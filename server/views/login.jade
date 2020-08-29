@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    form(action="login", method="post")
+        div(data-role='fieldcontain')
+            fieldset(data-role='controlgroup')
+                label(for='username') username
+                    input(id='username', type='text', value='', placeholder='username', name='username')
+        div#passworddiv(data-role='fieldcontain')
+            fieldset(data-role='controlgroup')
+                label(for='password') password
+                    input(id='password', type='password', value='', placeholder='password', name='password')

@@ -32,7 +32,7 @@ router.post('/', (req, res) => {
 })
 
 // PUT update user by id
-router.post('/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   const id = parseint(request.params.id);
   const { username, password, email, fullname, profilePicture} = req.body;
 
@@ -50,7 +50,12 @@ router.post('/:id', (req, res) => {
 
 // DELETE user by id 
 router.delete('/:id', (req, res) => {
-  const id = parseInt(request.params.id)
+  const id = parseInt(req.params.id);
+
+  db.query('DELETE FROM users WHERE id = $1', [id], (error, results) => {
+    if (error) throw error;
+    res.status(200).send(`User deleted with ID: ${id}`);
+  })
 });
 
 module.exports = router;
