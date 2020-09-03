@@ -1,20 +1,18 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-const passport = require('../passport');
+const { authenticate, requiresAuthentication } = require("../passport");
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.send({message: "Hello world!"});
+router.get("/", requiresAuthentication(), (req, res) => {
+  res.render("index", { title: "Home", name: req.user.fullname });
 });
 
-router.post('/login', passport.authenticate('local', { failureRedirect: '/login'}),
-  (req, res) => {
-    res.redirect('/');
-  }
-)
+router.post("/login", authenticate, (req, res) => {
+  res.redirect("/");
+});
 
-router.get('/login', (req, res) => {
-  res.status(200).send("FAIL!");
-})
+router.get("/login", (req, res) => {
+  res.render("login");
+});
 
 module.exports = router;

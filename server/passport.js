@@ -1,38 +1,51 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const db = require("./database");
+const bcrypt = require("bcrypt");
+
+const LOGIN_ROUTE = "/login";
+const HOME_ROUTE = "/";
 
 // Initialize passport
-/* passport.use(new localStrategy(
-    function (username, password, done) {
-        console.log('36');
-        db.query("SELECT * FROM users WHERE username=$1", [username], (err, results) => {
-            if (err) return done(err);
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    const userId = await db.getUserIdByName(username);
+    if (userId.length === 0) done(null, false);
+    const userPw = (await db.getUserPassword(userId[0].id))[0].password;
+    const user = await db.getUserById(userId[0].id);
+    console.log(user);
 
-            console.log(results);
-            if (results.rows[0] && results.rows[0].password == password)
-                done(null, results.rows[0]);
-            done(null, false);
+    if (bcrypt.compareSync(password, userPw)) return done(null, user);
+    done(null, false);
+  })
+);
 
-        });
-    }));*/
-passport.use(new LocalStrategy(
-    function (username, password, done) {
-        console.log("LocalStrategy working...");
-        return done(null, { id: 1, username: 'Joe', password: 'schmo' });
-    }
-));
-
-passport.serializeUser(function (user, done) {
-    done(null, user.id);
+passport.serializeUser((user, done) => {
+  done(null, user.id);
 });
 
-passport.deserializeUser(function (id, done) {
-    console.log('31');
-    db.query("SELECT * FROM users WHERE id=$1", [id], function (err, user) {
-        if (err) { return done(err); }
-        done(null, results.rows[0]);
-    });
+passport.deserializeUser(async (id, done) => {
+  done(null, await db.getUserById(id));
 });
 
+/*
+If administrative = true only administrative users are allowed
+If ownUserOnly = true the authenticated user is compared to req.params.id
+*/
+exports.requiresAuthentication = (administrative = false, ownUserOnly = false) => (req, res, next) => {
+  if (req.isUnauthenticated()) return res.redirect(LOGIN_ROUTE);
+  if ((administrative && req.user.roleId > db.roles.ADMIN) || (ownUserOnly && req.user.id !== parseInt(req.params.id)))
+    return res.status(403).send("Forbidden");
+  next();
+};
 
-module.exports = passport;
+exports.requiresNotAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) return res.redirect(HOME_ROUTE);
+  next();
+};
+
+exports.authenticate = passport.authenticate("local", {
+  failureRedirect: "/login",
+});
+
+exports.passport = passport;
