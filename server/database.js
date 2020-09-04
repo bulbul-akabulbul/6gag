@@ -19,6 +19,30 @@ const pool = new Pool({
   });
 })();
 
+/**
+ * Declaring return types:
+ * @typedef User
+ * @property {number} id - User's ID.
+ * @property {string} username - User's username.
+ * @property {string} fullname - User's full name to display.
+ * @property {string} email - User's email.
+ * @property {string} profilePicture - User's base64 encoded profile picture.
+ * @property {number} roleId - User's role id, as defined in module.roles.
+ *
+ * @typedef NewUser
+ * @property {string} username User's username. Will be used to authenticate.
+ * @property {string} password User's password. Hashed and salted.
+ * @property {string} email User's email.
+ * @property {string} fullname User's full name. Ready for display.
+ * @property {string} profilePicture User's profile picture encoded using Base64.
+ */
+
+/* =============== Users section =============== */
+
+/**
+ * Returns a list of all users.
+ * @return {Promise<User[]>} Array of all users. (id, username, fullname, email and profilePicture)
+ */
 exports.getAllUsers = async () => {
   try {
     return (
@@ -31,6 +55,11 @@ exports.getAllUsers = async () => {
   }
 };
 
+/**
+ * Returns a user object by it's ID.
+ * @param {number} id ID of the requested user.
+ * @returns {User} User.
+ */
 exports.getUserById = async (id) => {
   try {
     return (
@@ -44,6 +73,11 @@ exports.getUserById = async (id) => {
   }
 };
 
+/**
+ * Adds a new user to the database.
+ * @param {NewUser} user The new user to be added. Everything is required but profilePicture. Default role is USER.
+ * @returns {Promise<number>} The ID of the newly created user.
+ */
 exports.addNewUser = async (user) => {
   // Validate user should never return an error, instead it should be checked by the router function.
   // This is here just for safety reasons.
@@ -68,6 +102,12 @@ exports.addNewUser = async (user) => {
   }
 };
 
+/**
+ * Updates a user by ID
+ * @param {number} id ID of the user to update.
+ * @param {NewUser} user The new user values. Undefined values dont change.
+ * @returns {Promise<number>} The ID of the updated user.
+ */
 exports.updateUser = async (id, user) => {
   const { username, password, email, fullname, profilePicture } = user;
   const values = [username, password, email, fullname, profilePicture, id].filter((v) => v !== undefined);
@@ -87,6 +127,11 @@ ${profilePicture !== undefined ? ` profile_picture = $${values.indexOf(profilePi
   }
 };
 
+/**
+ * Returns the password of the user by ID.
+ * @param {number} id ID of the user.
+ * @returns {Promise<number>} User's password. Hashed and salted!
+ */
 exports.getUserPassword = async (id) => {
   try {
     return (await pool.query("SELECT password FROM users WHERE id = $1", [id])).rows[0].password;
@@ -95,6 +140,11 @@ exports.getUserPassword = async (id) => {
   }
 };
 
+/**
+ *
+ * @param {string} username User's username
+ * @returns {number} The corresponding user ID.
+ */
 exports.getUserIdByName = async (username) => {
   try {
     return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows[0].id;
@@ -103,6 +153,11 @@ exports.getUserIdByName = async (username) => {
   }
 };
 
+/**
+ * Deletes a user from the database.
+ * @param {number} id The ID of the user to be deleted.
+ * @returns {number} The ID of the deleted user.
+ */
 exports.deleteUser = async (id) => {
   try {
     await pool.query("DELETE FROM users WHERE id = $1", [id]);
