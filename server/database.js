@@ -21,10 +21,13 @@ const pool = new Pool({
 
 exports.getAllUsers = async () => {
   try {
-    const results = await pool.query("SELECT id, username, fullname, email, profile_picture FROM users");
-    return results.rows;
+    return (
+      await pool.query(
+        'SELECT id, username, fullname, email, profile_picture AS "profilePicture", role_id AS "roleId" FROM users'
+      )
+    ).rows;
   } catch (err) {
-    throw err;
+    throw err.message;
   }
 };
 
@@ -37,7 +40,7 @@ exports.getUserById = async (id) => {
       )
     ).rows[0];
   } catch (err) {
-    throw err;
+    throw err.message;
   }
 };
 
@@ -80,7 +83,7 @@ ${profilePicture !== undefined ? ` profile_picture = $${values.indexOf(profilePi
     console.log(q);
     return (await pool.query(q, values)).rows;
   } catch (err) {
-    return err.message;
+    throw err.message;
   }
 };
 
@@ -88,7 +91,7 @@ exports.getUserPassword = async (id) => {
   try {
     return (await pool.query("SELECT password FROM users WHERE id = $1", [id])).rows;
   } catch (error) {
-    throw error;
+    throw error.message;
   }
 };
 
@@ -96,7 +99,7 @@ exports.getUserIdByName = async (username) => {
   try {
     return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows;
   } catch (error) {
-    throw error;
+    throw error.message;
   }
 };
 
@@ -104,7 +107,9 @@ exports.deleteUser = async (id) => {
   try {
     await pool.query("DELETE FROM users WHERE id = $1", [id]);
     return id;
-  } catch {
-    if (error) return error.message;
+  } catch (error) {
+    throw error.message;
+  }
+};
   }
 };

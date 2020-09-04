@@ -34,9 +34,9 @@ If ownUserOnly = true the authenticated user is compared to req.params.id
 */
 exports.requiresAuthentication = (administrative = false, ownUserOnly = false) => (req, res, next) => {
   if (req.isUnauthenticated()) return res.redirect(LOGIN_ROUTE);
-  if ((administrative && req.user.roleId > db.roles.ADMIN) || (ownUserOnly && req.user.id !== parseInt(req.params.id)))
-    return res.status(403).send("Forbidden");
-  next();
+  if ((administrative && req.user.roleId <= db.roles.ADMIN) || (ownUserOnly && req.user.id == ownUserOnly(req)))
+    return next();
+  return res.status(403).send("Forbidden");
 };
 
 exports.requiresNotAuthenticated = (req, res, next) => {
