@@ -44,15 +44,11 @@ const pool = new Pool({
  * @return {Promise<User[]>} Array of all users. (id, username, fullname, email and profilePicture)
  */
 exports.getAllUsers = async () => {
-  try {
-    return (
-      await pool.query(
-        'SELECT id, username, fullname, email, profile_picture AS "profilePicture", role_id AS "roleId" FROM users'
-      )
-    ).rows;
-  } catch (err) {
-    throw err.message;
-  }
+  return (
+    await pool.query(
+      'SELECT id, username, fullname, email, profile_picture AS "profilePicture", role_id AS "roleId" FROM users'
+    )
+  ).rows;
 };
 
 /**
@@ -61,16 +57,12 @@ exports.getAllUsers = async () => {
  * @returns {User} User.
  */
 exports.getUserById = async (id) => {
-  try {
-    return (
-      await pool.query(
-        'SELECT id, username, fullname, profile_picture AS "profilePicture", role_id AS "roleId" FROM users WHERE id = $1',
-        [id]
-      )
-    ).rows[0];
-  } catch (err) {
-    throw err.message;
-  }
+  return (
+    await pool.query(
+      'SELECT id, username, fullname, profile_picture AS "profilePicture", role_id AS "roleId" FROM users WHERE id = $1',
+      [id]
+    )
+  ).rows[0];
 };
 
 /**
@@ -83,23 +75,19 @@ exports.addNewUser = async (user) => {
   // This is here just for safety reasons.
   const { error } = schemas.validateUser(user);
   if (error) throw error;
-  try {
-    return (
-      await pool.query(
-        "INSERT INTO users (username, password, email, fullname, profile_picture, role_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;",
-        [
-          user.username,
-          bcrypt.hashSync(user.password, 10),
-          user.email,
-          user.fullname,
-          user.profilePicture,
-          module.roles["USER"],
-        ]
-      )
-    ).rows[0].id;
-  } catch (error) {
-    throw error;
-  }
+  return (
+    await pool.query(
+      "INSERT INTO users (username, password, email, fullname, profile_picture, role_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;",
+      [
+        user.username,
+        bcrypt.hashSync(user.password, 10),
+        user.email,
+        user.fullname,
+        user.profilePicture,
+        module.roles["USER"],
+      ]
+    )
+  ).rows[0].id;
 };
 
 /**
@@ -119,12 +107,8 @@ ${email !== undefined ? ` email = $${values.indexOf(email) + 1}, ` : ""}\
 ${fullname !== undefined ? ` fullname = $${values.indexOf(fullname) + 1}, ` : ""}\
 ${profilePicture !== undefined ? ` profile_picture = $${values.indexOf(profilePicture) + 1}, ` : ""}`.slice(0, -2) +
     ` WHERE id = $${values.length} RETURNING id;`;
-  try {
-    console.log(q);
-    return (await pool.query(q, values)).rows[0].id;
-  } catch (err) {
-    throw err.message;
-  }
+  console.log(q);
+  return (await pool.query(q, values)).rows[0].id;
 };
 
 /**
@@ -133,11 +117,7 @@ ${profilePicture !== undefined ? ` profile_picture = $${values.indexOf(profilePi
  * @returns {Promise<number>} User's password. Hashed and salted!
  */
 exports.getUserPassword = async (id) => {
-  try {
-    return (await pool.query("SELECT password FROM users WHERE id = $1", [id])).rows[0].password;
-  } catch (error) {
-    throw error.message;
-  }
+  return (await pool.query("SELECT password FROM users WHERE id = $1", [id])).rows[0].password;
 };
 
 /**
@@ -146,11 +126,7 @@ exports.getUserPassword = async (id) => {
  * @returns {number} The corresponding user ID.
  */
 exports.getUserIdByName = async (username) => {
-  try {
-    return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows[0].id;
-  } catch (error) {
-    throw error.message;
-  }
+  return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows[0].id;
 };
 
 /**
@@ -159,12 +135,7 @@ exports.getUserIdByName = async (username) => {
  * @returns {number} The ID of the deleted user.
  */
 exports.deleteUser = async (id) => {
-  try {
-    await pool.query("DELETE FROM users WHERE id = $1", [id]);
-    return id;
-  } catch (error) {
-    throw error.message;
-  }
+  return (await pool.query("DELETE FROM users WHERE id = $1 RETURNING id", [id])).rows[0].id;
 };
-  }
+
 };
