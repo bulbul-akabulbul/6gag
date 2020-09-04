@@ -65,12 +65,12 @@ router.put(
     const id = parseInt(req.params.id);
     // Anything less powerful than admin
 
-    const user = { ...req.body, id: id };
+    const user = req.body;
 
-    db.updateUser(user)
+    db.updateUser(id, user)
       .then((result) => {
         if (result.length === 0) return res.status(400).send(`No user with id ${id}`);
-        return res.status(200).send(`User modified with ID: ${result[0].id}`);
+        return res.status(200).send(`User modified with ID: ${result}`);
       })
       .catch((err) => next(createError(500, err)));
   }

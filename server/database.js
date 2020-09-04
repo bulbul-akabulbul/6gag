@@ -68,8 +68,8 @@ exports.addNewUser = async (user) => {
   }
 };
 
-exports.updateUser = async (user) => {
-  const { username, password, email, fullname, profilePicture, id } = user;
+exports.updateUser = async (id, user) => {
+  const { username, password, email, fullname, profilePicture } = user;
   const values = [username, password, email, fullname, profilePicture, id].filter((v) => v !== undefined);
   const q =
     `UPDATE users SET \
@@ -81,7 +81,7 @@ ${profilePicture !== undefined ? ` profile_picture = $${values.indexOf(profilePi
     ` WHERE id = $${values.length} RETURNING id;`;
   try {
     console.log(q);
-    return (await pool.query(q, values)).rows;
+    return (await pool.query(q, values)).rows[0].id;
   } catch (err) {
     throw err.message;
   }
@@ -89,7 +89,7 @@ ${profilePicture !== undefined ? ` profile_picture = $${values.indexOf(profilePi
 
 exports.getUserPassword = async (id) => {
   try {
-    return (await pool.query("SELECT password FROM users WHERE id = $1", [id])).rows;
+    return (await pool.query("SELECT password FROM users WHERE id = $1", [id])).rows[0].password;
   } catch (error) {
     throw error.message;
   }
@@ -97,7 +97,7 @@ exports.getUserPassword = async (id) => {
 
 exports.getUserIdByName = async (username) => {
   try {
-    return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows;
+    return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows[0].id;
   } catch (error) {
     throw error.message;
   }
