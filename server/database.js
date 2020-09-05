@@ -35,6 +35,16 @@ const pool = new Pool({
  * @property {string} email User's email.
  * @property {string} fullname User's full name. Ready for display.
  * @property {string} profilePicture User's profile picture encoded using Base64.
+ *
+ *
+ *
+ * @typedef Post
+ * @property {number} id ID of the picture.
+ * @property {number} userId The user ID that uploaded the picture.
+ * @property {string} picture Base64 encoded picture.
+ * @property {string} description The description associated with that picture.
+ * @property {Date} uploadDate Upload date of the picture.
+ *
  */
 
 /**
@@ -142,4 +152,67 @@ exports.deleteUser = async (id) => {
   return (await pool.query("DELETE FROM users WHERE id = $1 RETURNING id", [id])).rows[0].id;
 };
 
+/**
+ * ==============================
+ *         Posts section
+ * ==============================
+ */
+
+/**
+ * Returns all the posts.
+ * @returns {Promise<Post[]>} An array of all posts.
+ */
+exports.getAllPosts = async () => {
+  return (
+    await pool.query('SELECT id, user_id AS "userId", picture, description, upload_date AS "uploadDate" FROM photos;')
+  ).rows;
+};
+
+/**
+ * Returns a single post by ID
+ * @param {number} id The ID of the post.
+ * @returns {Promise<Post>} The post with the requested ID.
+ */
+exports.getPostById = async (id) => {
+  return (
+    await pool.query(
+      'SELECT id, user_id AS "userId", picture, description, upload_date AS "uploadDate" FROM photos WHERE id = $1',
+      [id]
+    )
+  ).rows[0];
+};
+
+/**
+ * Adds a new post to the database.
+ * @param {Post} post The new post to be added.
+ * @returns {Promise<number>} ID of the newly created post.
+ */
+exports.addNewPost = async (post) => {
+  return (
+    await pool.query(
+      "INSERT INTO photos (user_id, picture, description, upload_date) VALUES ($1, $2, $3, $4) RETURNING id;",
+      Object.values(post)
+    )
+  ).rows[0].id;
+};
+
+/**
+ * Updates a post's description.
+ * @param {number} id The ID of the post to be changed.
+ * @param {string} newDescription The new description of the post.
+ * @returns {Promise<number>} The ID of the edited post.
+ */
+exports.updatePostDescription = async (id, newDescription) => {
+  return (await pool.query("UPDATE photos SET description = $1 WHERE id = $2 RETURNING id", [newDescription, id]))
+    .rows[0].id;
+};
+
+/**
+ * Deletes a post from the database.
+ * @param {number} id The ID of the post to be deleted.
+ * @returns {number} The ID of the deleted post.
+ */
+exports.deletePost = async (id) => {
+  console.log("id is: ", id);
+  return (await pool.query("DELETE FROM photos WHERE id = $1 RETURNING id;", [id])).rows[0].id;
 };
