@@ -9,10 +9,10 @@ exports.user = Joi.object({
   roleId: Joi.number().required(),
 });
 
-exports.photo = Joi.object({
+exports.post = Joi.object({
   userId: Joi.number().required(),
   picture: Joi.string().required(),
-  description: Joi.string(),
+  description: Joi.string().max(250),
   uploadDate: Joi.date().iso(),
 });
 
@@ -27,8 +27,8 @@ exports.validateUser = (user) => {
   return exports.user.validate(user);
 };
 
-exports.validatePhoto = (photo) => {
-  return exports.photo.validate(photo);
+exports.validatePost = (post) => {
+  return exports.post.validate(post);
 };
 
 exports.validatePhotoComment = (photoComment) => {

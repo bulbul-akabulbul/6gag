@@ -37,7 +37,11 @@ const pool = new Pool({
  * @property {string} profilePicture User's profile picture encoded using Base64.
  */
 
-/* =============== Users section =============== */
+/**
+ * ==============================
+ *         Users section
+ * ==============================
+ */
 
 /**
  * Returns a list of all users.
@@ -54,7 +58,7 @@ exports.getAllUsers = async () => {
 /**
  * Returns a user object by it's ID.
  * @param {number} id ID of the requested user.
- * @returns {User} User.
+ * @returns {Promise<User>} User.
  */
 exports.getUserById = async (id) => {
   return (
@@ -123,7 +127,7 @@ exports.getUserPassword = async (id) => {
 /**
  *
  * @param {string} username User's username
- * @returns {number} The corresponding user ID.
+ * @returns {Promise<number>} The corresponding user ID.
  */
 exports.getUserIdByName = async (username) => {
   return (await pool.query("SELECT id FROM users WHERE username = $1", [username])).rows[0].id;
@@ -132,7 +136,7 @@ exports.getUserIdByName = async (username) => {
 /**
  * Deletes a user from the database.
  * @param {number} id The ID of the user to be deleted.
- * @returns {number} The ID of the deleted user.
+ * @returns {Promise<number>} The ID of the deleted user.
  */
 exports.deleteUser = async (id) => {
   return (await pool.query("DELETE FROM users WHERE id = $1 RETURNING id", [id])).rows[0].id;

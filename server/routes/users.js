@@ -63,9 +63,14 @@ router.put(
   requiresAuthentication(true, (req) => parseInt(req.params.id)),
   (req, res, next) => {
     const id = parseInt(req.params.id);
-    // Anything less powerful than admin
 
-    const user = req.body;
+    const user = {
+      username: req.body.username,
+      password: req.body.password,
+      email: req.body.email,
+      fullname: req.body.fullname,
+      profilePicture: req.body.profilePicture,
+    };
 
     db.updateUser(id, user)
       .then((result) => {
